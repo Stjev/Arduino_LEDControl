@@ -6,8 +6,11 @@
    * Leds
    */
   #include <FastLED.h>
-  
-  #define JACK A0
+
+  #define STROBE 12
+  #define RESET 13
+  #define DC_One A0
+  #define DC_Two A1 
   #define NUM_LEDS 150
   #define DATA_PIN_1 5
   #define DATA_PIN_2 6
@@ -25,29 +28,15 @@
   struct CRGB leds2[NUM_LEDS];
 
   /**
-   * FFT
-   * 
-   * Bass -> bands 0 - 9
-   * Mid -> bands 10 - 63
-   * Treble -> bands 64 - 127
-   */
-  #include "fix_fft.h"
-  
-  const int n = 7;
-  const int bands = pow(2, n);
-  
-  char im[bands], data[bands];
-  
-  int b = 0, val;
-  static long tt=0;
-
-  /**
    * Custom
    */   
   float bass = 0;
 
+  int frequencies_One[7];
+  int frequencies_Two[7];
+
   int brightness = 255;
-  uint8_t mode = 4;
+  uint8_t mode = 0;
   uint8_t data_counter = 0;
   
   float red = 255.0, green = 0.0, blue = 0.0;
@@ -70,9 +59,7 @@
   /**
    * Runs only once when the arduino starts
    */
-  void setup() {    
-    pinMode(JACK, INPUT);
-    
+  void setup() {        
     FastLED.addLeds<WS2812, DATA_PIN_1, GRB>(leds1, NUM_LEDS);
     FastLED.addLeds<WS2812, DATA_PIN_2, GRB>(leds2, NUM_LEDS);
     FastLED.setBrightness(brightness);
@@ -80,6 +67,25 @@
       dots1[i][0] = -1;
       dots2[i][0] = -1;
     }
+
+    //Set spectrum Shield pin configurations
+    pinMode(STROBE, OUTPUT);
+    pinMode(RESET, OUTPUT);
+    pinMode(DC_One, INPUT);
+    pinMode(DC_Two, INPUT);  
+    digitalWrite(STROBE, HIGH);
+    digitalWrite(RESET, HIGH);
+  
+    //Initialize Spectrum Analyzers
+    digitalWrite(STROBE, LOW);
+    delay(1);
+    digitalWrite(RESET, HIGH);
+    delay(1);
+    digitalWrite(STROBE, HIGH);
+    delay(1);
+    digitalWrite(STROBE, LOW);
+    delay(1);
+    digitalWrite(RESET, LOW);
 
     Serial.begin(9600);
   }
@@ -153,41 +159,43 @@
     }
   }
 
+
+  /*************Pull frquencies from Spectrum Shield****************/
+  void read_Frequencies(){
+    //Read frequencies for each band
+    for (int freq_amp = 0; freq_amp<7; freq_amp++)
+    {
+      frequencies_One[freq_amp] = analogRead(DC_One);
+      frequencies_Two[freq_amp] = analogRead(DC_Two); 
+      digitalWrite(STROBE, HIGH);
+      digitalWrite(STROBE, LOW);
+    }
+  }
+
   /**  
    * Sound reactive Mode
    */
   void soundReactive(){
+    read_Frequencies(); 
 
+    int newData = 0;
+
+    for(int i= 0; i<7; i++)
+     {
+       // For now only using bass
+       if(i == 0) {
+         newData = max(frequencies_Two[i], frequencies_One[i]);
+       }
+     }
+    
     // Get a beautified version of the lowest band
-    /*bass = min(nextValue(analogRead(JACK) * 1.5, bass), 150);
+    bass = min(nextValue(newData / 4, bass), 150);
+    Serial.println(bass);
+        
+    // Get a beautified version of the lowest band
+    //bass = min(nextValue(, bass), 150);
     
-    drawLeds();*/
-    if (b < bands) {
-        // Get (a beautified version of) the value of the audio jack
-        data[b] = nextValue(analogRead(JACK), data[b] - bands * 4);
-        im[b] = 0;
-        b++;
-      } 
-      else {
-        // Run the fft algorithm
-        fix_fft(data,im,n,0);
-    
-        if (millis() - tt > 100) {
-            tt = millis();
-        }
-  
-        // Get the absolute value
-        for (int i = 0; i < bands / 2; i++) {
-            data[i] = sqrt(data[i] * data[i] + im[i] * im[i]);
-        }
-        
-        // Get a beautified version of the lowest band
-        bass = min(nextValue(getAverageTone(0, 9, data), bass), 150);
-        
-        drawLeds();
-        
-        b = 0;
-      }
+    drawLeds();
   }
 
   // Calculate the next value for the band, this function will smoothen out the graph.
