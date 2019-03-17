@@ -189,7 +189,7 @@
      }
     
     // Get a beautified version of the lowest band
-    bass = min(nextValue(newData / 4, bass), 150);
+    bass = min(nextValue(newData / 3, bass), 150);
     Serial.println(bass);
         
     // Get a beautified version of the lowest band
@@ -200,6 +200,7 @@
 
   // Calculate the next value for the band, this function will smoothen out the graph.
   float nextValue(float data, float band) {
+    data = data - 23;
     if(data > band) {
       return data;
     } else {
