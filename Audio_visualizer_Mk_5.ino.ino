@@ -54,7 +54,9 @@
   /**
    * Static
    */
-   CRGB color = CRGB(140, 40, 0);
+  //CRGB color = CRGB(140, 40, 0); //orange
+  //CRGB color = CRGB(255, 96, 33);
+   CRGB color = CRGB::White;
 
   /**
    * Runs only once when the arduino starts
@@ -193,7 +195,6 @@
     Serial.println(bass);
         
     // Get a beautified version of the lowest band
-    //bass = min(nextValue(, bass), 150);
     
     drawLeds();
   }
