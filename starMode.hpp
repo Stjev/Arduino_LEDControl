@@ -11,7 +11,7 @@ class StarStatus
 public:
     int16_t active_led;      // The led active
     int brightness;          // The brightness of this led
-    int8_t brightness_speed; // The speed the led is getting brighter
+    int16_t brightness_speed; // The speed the led is getting brighter
 };
 
 void initialize_stars();

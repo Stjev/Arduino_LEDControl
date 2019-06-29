@@ -33,6 +33,11 @@ void newRandomStar(uint8_t pos, uint8_t strip)
  */
 void starmode()
 {
+  for (uint8_t i = 0; i < NUM_LEDS; i++) {
+    leds1[i] = CRGB::Black;
+    leds2[i] = CRGB::Black;
+  }
+  
   for (uint8_t i = 0; i < STARCOUNT_PER_STRIP; i++)
   {
     starLogic(i, 1);
@@ -46,16 +51,16 @@ void starLogic(uint8_t i, uint8_t strip)
 {
   StarStatus& star = (strip == 1)? dots1[i] : dots2[i];
 
-  // Generate stars for strip 1
+  // Generate a star
   if (star.active_led == -1)
     newRandomStar(i, strip);
   else
   {
-    // The led is at its max brightness
-    if (star.brightness > SPEED)
+    // The led is at its max brightness and it is not yet going down
+    if (star.brightness >= SPEED && star.brightness_speed > 0)
       star.brightness_speed *= -1;
 
-    star.brightness += star.brightness_speed;
+    star.brightness = min(SPEED, max(0, star.brightness + star.brightness_speed));
 
     CRGB color = CRGB(0, 0, map(star.brightness, 0, SPEED, 0, brightness));
 
