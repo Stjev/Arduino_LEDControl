@@ -1,9 +1,6 @@
 - Optimize Sound visualizer code
 - Optimize Sound visualizer reacting to music (more than only bass)
 
-- Seperate Static color mode in different file
-- Seperate Color cycling mode in different file
-- Seperate Bluetooth in different file
 - Update Bluetooth to work with sending color while using static color mode
 
 - Optimize code for lower memory
