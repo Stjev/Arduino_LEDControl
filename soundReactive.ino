@@ -1,10 +1,15 @@
 #include "soundReactive.hpp"
+#include "staticMode.hpp"
 #include <FastLED.h>
 
 float amplitude = 0;
 
 int frequencies[CHANNEL_COUNT];
 float scaling[CHANNEL_COUNT] = {.4, .2, .15, .1, .075, .05, .025}; // Sum should be 1
+
+// 0 = reaction is the amount of leds
+// 1 = reaction is the brightness of the leds (all leds are on)
+uint8_t reactive_mode = 0;
 
 // Pull frquencies from Spectrum Shield
 void read_Frequencies()
@@ -61,7 +66,7 @@ void soundReactive()
     }
 
     Serial.println(newData);
-  
+
     // Get a beautified version of the lowest band
     amplitude = min(
         nextValue(
@@ -78,7 +83,7 @@ float nextValue(float data, float curr)
 {
     data = data - THRESHOLD;
 
-    if (data > curr - 5 && data < curr + (curr / 10)) 
+    if (data > curr - 5 && data < curr + (curr / 10))
         return curr - 0.25;
     else if (data > curr)
         return data;
@@ -95,19 +100,24 @@ void drawLeds()
     if (amplitude < 1)
         amplitude = 0;
 
-    // Turn the leds on by amplitude
-    for (uint8_t i = 0; i < amplitude; i++)
+    if (reactive_mode == 0)
     {
-        // Color the leds, more blue at the bottom and more red at the top.
-        CRGB color = CRGB(
-            map(i, 0, amplitude, 0, 255), // Red
-            0,                            // Green
-            map(i, 0, amplitude, 255, 0)  // Blue
-        );
+        // Turn the leds on by amplitude
+        for (uint8_t i = 0; i < amplitude; i++)
+        {
+            // Color the leds, more blue at the bottom and more red at the top.
+            CRGB color = CRGB(
+                map(i, 0, amplitude, 0, 255), // Red
+                0,                            // Green
+                map(i, 0, amplitude, 255, 0)  // Blue
+            );
 
-        leds1[i] = color;
-        leds2[i] = color;
+            leds1[i] = color;
+            leds2[i] = color;
+        }
     }
+    else
+        staticMode();
 
     FastLED.show();
 }

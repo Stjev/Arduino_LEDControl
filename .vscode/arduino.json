@@ -1,3 +1,6 @@
 {
-    "port": "COM6"
+    "port": "COM6",
+    "board": "arduino:avr:uno",
+    "programmer": "AVRISP mkII",
+    "sketch": "Audio_visualizer_Mk_5.ino"
 }
