@@ -3,11 +3,10 @@
    */
 #include <FastLED.h>
 #include "starMode.hpp"
+#include "soundReactive.hpp"
 
 #define STROBE 12
 #define RESET 13
-#define DC_One A0
-#define DC_Two A1
 #define NUM_LEDS 150
 #define DATA_PIN_1 5
 #define DATA_PIN_2 6
@@ -23,20 +22,16 @@ struct CRGB leds2[NUM_LEDS];
 /**
    * Custom
    */
-float bass = 0;
-
-int frequencies_One[7];
-int frequencies_Two[7];
 
 int brightness = 255;
 
 /**
-   * 0 = Sound reactive mode
-   * 1 = Star mode
-   * 2 = Static color mode
-   * 3 = Color cycle mode
-   */
-uint8_t mode = 1;
+  * 0 = Sound reactive mode
+  * 1 = Star mode
+  * 2 = Static color mode
+  * 3 = Color cycle mode
+  */
+uint8_t mode = 0;
 
 uint8_t data_counter = 0;
 
@@ -175,114 +170,12 @@ void resetLEDS()
   }
 }
 
-/*************Pull frquencies from Spectrum Shield****************/
-void read_Frequencies()
-{
-  //Read frequencies for each band
-  for (int freq_amp = 0; freq_amp < 7; freq_amp++)
-  {
-    frequencies_One[freq_amp] = analogRead(DC_One);
-    frequencies_Two[freq_amp] = analogRead(DC_Two);
-    digitalWrite(STROBE, HIGH);
-    digitalWrite(STROBE, LOW);
-  }
-}
-
-/**  
-   * Sound reactive Mode
-   */
-void soundReactive()
-{
-  read_Frequencies();
-
-  int newData = 0;
-
-  for (int i = 0; i < 7; i++)
-  {
-    // For now only using bass
-    if (i == 0)
-    {
-      newData = max(frequencies_Two[i], frequencies_One[i]);
-    }
-  }
-
-  // Get a beautified version of the lowest band
-  bass = min(nextValue(newData / 3, bass), 150);
-  Serial.println(bass);
-
-  // Get a beautified version of the lowest band
-
-  drawLeds();
-}
-
-// Calculate the next value for the band, this function will smoothen out the graph.
-float nextValue(float data, float band)
-{
-  data = data - 23;
-  if (data > band)
-  {
-    return data;
-  }
-  else
-  {
-    return band - band / 50;
-  }
-}
-
-// Method to draw the leds
-void drawLeds()
-{
-  FastLED.clear(); // Turn all leds off
-
-  FastLED.setBrightness(map(bass, 0, 150, 20, brightness));
-
-  if (bass < 1)
-    bass = 0;
-
-  // Turn the leds on by bass on strip 1
-  for (int i = 0; i < bass; i++)
-  {
-    // Color the leds, more blue at the bottom and more red at the top.
-    leds1[i] = CRGB(
-        map(i, 0, bass, 0, 255), // Red
-        0,                       // Green
-        map(i, 0, bass, 255, 0)  // Blue
-    );
-  }
-
-  // Turn the leds on by bass on strip 2
-  for (int i = 0; i < bass; i++)
-  {
-    // Color the leds, more blue at the bottom and more red at the top.
-    leds2[i] = CRGB(
-        map(i, 0, bass, 0, 255), // Red
-        0,                       // Green
-        map(i, 0, bass, 255, 0)  // Blue
-    );
-  }
-
-  FastLED.show();
-}
-
-// Gets the avarage of bands
-float getAverageTone(int from, int to, char data[])
-{
-  float sum = 0;
-
-  for (int i = from; i <= to; i++)
-  {
-    sum += data[i] * SENSITIVITY;
-  }
-
-  return sum / (to - from + 1);
-}
-
 /**
    * Static Mode
    */
 void staticMode()
 {
-  for (int i = 0; i < NUM_LEDS; i++)
+  x for (int i = 0; i < NUM_LEDS; i++)
   {
     leds1[i] = color;
     leds2[i] = color;
