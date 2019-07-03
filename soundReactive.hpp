@@ -11,8 +11,23 @@
 #define RETRACT_RATE 50           // The speed the leds go down, higher = faster
 #define THRESHOLD 23              // The threshold for the leds to start reacting to music
 
+class SoundReactive
+{
+public:
+    // 0 = reaction is the amount of leds
+    // 1 = reaction is the brightness of the leds (all leds are on)
+    uint8_t reactive_mode = 0;
+    uint8_t red = 0;
+    uint8_t green = 0;
+    uint8_t blue = 255;
+};
+
 void initialize_shield();
-void soundReactive();
+void soundReactiveMode();
 void drawLeds();
+void setReactiveMode(uint8_t mode);
+void setReactiveRed(uint8_t red);
+void setReactiveGreen(uint8_t green);
+void setReactiveBlue(uint8_t blue);
 
 #endif

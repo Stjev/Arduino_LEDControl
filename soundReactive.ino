@@ -7,9 +7,7 @@ float amplitude = 0;
 int frequencies[CHANNEL_COUNT];
 float scaling[CHANNEL_COUNT] = {.4, .2, .15, .1, .075, .05, .025}; // Sum should be 1
 
-// 0 = reaction is the amount of leds
-// 1 = reaction is the brightness of the leds (all leds are on)
-uint8_t reactive_mode = 0;
+SoundReactive soundReactive;
 
 // Pull frquencies from Spectrum Shield
 void read_Frequencies()
@@ -50,10 +48,30 @@ void initialize_shield()
     digitalWrite(RESET, LOW);
 }
 
+void setReactiveMode(uint8_t mode)
+{
+    soundReactive.reactive_mode = mode;
+}
+
+void setReactiveRed(uint8_t red)
+{
+    soundReactive.red = red;
+}
+
+void setReactiveGreen(uint8_t green)
+{
+    soundReactive.green = green;
+}
+
+void setReactiveBlue(uint8_t blue)
+{
+    soundReactive.blue = blue;
+}
+
 /**  
  * Sound reactive Mode
  */
-void soundReactive()
+void soundReactiveMode()
 {
     read_Frequencies();
 
@@ -64,8 +82,6 @@ void soundReactive()
         // Scale the different frequencies
         newData += scaling[i] * frequencies[i];
     }
-
-    Serial.println(newData);
 
     // Get a beautified version of the lowest band
     amplitude = min(
@@ -95,12 +111,12 @@ float nextValue(float data, float curr)
 void drawLeds()
 {
     FastLED.clear(); // Turn all leds off
-    FastLED.setBrightness(map(amplitude, 0, 150, 20, brightness));
+    FastLED.setBrightness(map(amplitude, 0, 150, map(brightness, 0, 255, 0, 20), brightness));
 
     if (amplitude < 1)
         amplitude = 0;
 
-    if (reactive_mode == 0)
+    if (soundReactive.reactive_mode == 0)
     {
         // Turn the leds on by amplitude
         for (uint8_t i = 0; i < amplitude; i++)
@@ -117,7 +133,14 @@ void drawLeds()
         }
     }
     else
-        staticMode();
+    {
+        CRGB color = CRGB(soundReactive.red, soundReactive.green, soundReactive.blue);
+        for (uint8_t i = 0; i < NUM_LEDS; i++)
+        {
+            leds1[i] = color;
+            leds2[i] = color;
+        }
+    }
 
     FastLED.show();
 }

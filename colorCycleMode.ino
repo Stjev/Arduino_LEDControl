@@ -3,51 +3,53 @@
 
 float red = 255.0, green = 0.0, blue = 0.0;
 
+Cycle cycle;
+
 void colorCycleMode()
 {
     if (red >= 255)
     {
         if (blue > 0)
         {
-            blue -= CYCLESPEED;
+            blue = max(0, blue - cycle.speed);
         }
         else if (green >= 255)
         {
-            red -= CYCLESPEED;
+            red = max(0, red - cycle.speed);
         }
         else
         {
-            green += CYCLESPEED;
+            green = min(255, green + cycle.speed);
         }
     }
     else if (green >= 255)
     {
         if (red > 0)
         {
-            red -= CYCLESPEED;
+            red = max(0, red - cycle.speed);
         }
         else if (blue >= 255)
         {
-            green -= CYCLESPEED;
+            green = max(0, green - cycle.speed);
         }
         else
         {
-            blue += CYCLESPEED;
+            blue = min(255, blue + cycle.speed);
         }
     }
     else if (blue >= 255)
     {
         if (green > 0)
         {
-            green -= CYCLESPEED;
+            green = max(0, green - cycle.speed);
         }
         else if (red >= 255)
         {
-            blue -= CYCLESPEED;
+            blue = max(0, blue - cycle.speed);
         }
         else
         {
-            red += CYCLESPEED;
+            red = min(255, red + cycle.speed);
         }
     }
 
@@ -57,4 +59,9 @@ void colorCycleMode()
         leds2[i] = CRGB(red, green, blue);
     }
     FastLED.show();
+}
+
+void setCycleSpeed(uint8_t speed)
+{
+    cycle.speed = speed / 50.0;
 }

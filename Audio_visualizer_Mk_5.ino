@@ -7,7 +7,7 @@
 #include "staticMode.hpp"
 
 #define NUM_LEDS 150
-#define DATA_PIN_1 5
+#define DATA_PIN_1 3
 #define DATA_PIN_2 6
 
 struct CRGB leds1[NUM_LEDS];
@@ -21,7 +21,7 @@ uint8_t brightness = 255;
   * 2 = Static color mode
   * 3 = Color cycle mode
   */
-uint8_t mode = 0;
+uint8_t mode = 1;
 
 /**
    * Runs only once when the arduino starts
@@ -47,7 +47,7 @@ void loop()
 
   // Mode 1: The leds react to the music
   if (mode == 0)
-    soundReactive();
+    soundReactiveMode();
   // Mode 2: Star mode
   else if (mode == 1)
     starmode();

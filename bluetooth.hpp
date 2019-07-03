@@ -1,7 +1,7 @@
 #ifndef BLUETOOTH_HEADER
 #define BLUETOOTH_HEADER
 
-#define MAX_DATA_COUNT 1
+#define MAX_DATA_COUNT 4
 
 #include <stdint.h>
 
